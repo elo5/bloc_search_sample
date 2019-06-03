@@ -5,7 +5,7 @@ import 'package:bloc_search_sample/utils/log_util.dart';
 
 var dio = Dio();
 const int MAX_SEARCH_RESULTS = 5;
-const String API_KEY = 'AIzaSyAuO6puqoXvLK8MPEq6Qc0l_N8eYNDUqlI';
+const String API_KEY = 'YOUR_KEY';
 const String DATA_FETCH_TAG = 'DATA_FETCH_TAG';
 
 class DataFetchAPI {
