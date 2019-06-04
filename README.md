@@ -1,6 +1,6 @@
 # bloc_search_sample
 
-A new Flutter project.
+A sample youtube search page using bloc pattern
 
 ## Getting Started
 
