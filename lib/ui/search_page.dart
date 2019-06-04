@@ -35,7 +35,7 @@ class SearchPageState extends State<SearchPage> {
 
   void _onLoading() {
     isPullDown = false;
-   searchBloc.onLoadMore();
+    searchBloc.onLoadMore();
   }
 
   void _onRefresh() {
@@ -94,49 +94,44 @@ class SearchPageState extends State<SearchPage> {
                             });
                       } else if (snapshot.data ==
                           SearchStatus.AFTERSEARCHWITHRESULT) {
-                        return new StreamBuilder(
-                            stream: searchBloc.searchDataStream,
-                            builder: (BuildContext context,
-                                AsyncSnapshot<SearchResponse> snapshot) {
+                        if (isPullDown)
+                          _refreshController.refreshCompleted();
+                        else
+                          _refreshController.loadComplete();
 
-                              if( isPullDown )_refreshController.refreshCompleted();
-                              else _refreshController.loadComplete();
-
-                              return SmartRefresher(
-                                enablePullDown: true,
-                                enablePullUp: true,
-                                header: WaterDropMaterialHeader(
-                                  color: Colors.white,
-                                  backgroundColor: Colors.red,
-                                ),
-                                //defaultTargetPlatform == TargetPlatform.iOS?WaterDropHeader():WaterDropMaterialHeader(),
-                                controller: _refreshController,
-                                onRefresh: _onRefresh,
-                                onLoading: _onLoading,
-                                child: snapshot.data == null
-                                    ? ListView(
-                                        children: <Widget>[Container()],
-                                      )
-                                    : ListView.builder(
-                                        itemCount: (snapshot.data == null ||
-                                                searchBloc.resultList == null ||
-                                                searchBloc.resultList.length <
-                                                    1)
-                                            ? 0
-                                            : searchBloc.resultList.length,
-                                        itemBuilder:
-                                            (BuildContext context, int index) {
-                                          return buildVideoItem(context,
-                                              searchBloc.resultList[index]);
-                                        }),
-                              );
-                            });
+                        return SmartRefresher(
+                          enablePullDown: true,
+                          enablePullUp: true,
+                          header: WaterDropMaterialHeader(
+                            color: Colors.white,
+                            backgroundColor: Colors.red,
+                          ),
+                          //defaultTargetPlatform == TargetPlatform.iOS?WaterDropHeader():WaterDropMaterialHeader(),
+                          controller: _refreshController,
+                          onRefresh: _onRefresh,
+                          onLoading: _onLoading,
+                          child: snapshot.data == null
+                              ? ListView(
+                                  children: <Widget>[Container()],
+                                )
+                              : ListView.builder(
+                                  itemCount: (snapshot.data == null ||
+                                          searchBloc.resultList == null ||
+                                          searchBloc.resultList.length < 1)
+                                      ? 0
+                                      : searchBloc.resultList.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return buildVideoItem(
+                                        context, searchBloc.resultList[index]);
+                                  }),
+                        );
+                      } else if (snapshot.data == SearchStatus.SEARCHING) {
+                        return Center(child: RefreshProgressIndicator());
                       } else {
                         LogUtil.e(
                             "snapshot.data != SearchStatus.AFTERSEARCHNORESULT",
                             tag: "***** BrandSearchPage *****");
-
-
                         return EmptyView(
                           error: 'sorry we could not find any result',
                           backgroundColor: Colors.transparent,
@@ -305,9 +300,7 @@ class SearchPageState extends State<SearchPage> {
 
     return new InkWell(
       child: container,
-      onTap: () {
-
-      },
+      onTap: () {},
     );
   }
 

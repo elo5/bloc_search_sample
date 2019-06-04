@@ -9,6 +9,7 @@ class SearchStatus {
   static const int BEFORESEARCH = 1;
   static const int AFTERSEARCHNORESULT = 2;
   static const int AFTERSEARCHWITHRESULT = 3;
+  static const int SEARCHING = 4;
 }
 
 class SearchBloc implements BlocBase {
@@ -24,10 +25,6 @@ class SearchBloc implements BlocBase {
   SearchBloc() {
     LogUtil.e("****** SearchBloc ******", tag: TAG);
   }
-
-  BehaviorSubject<SearchResponse> _searchData = BehaviorSubject<SearchResponse>();
-  Sink<SearchResponse> get _searchDataSink => _searchData.sink;
-  Stream<SearchResponse> get searchDataStream => _searchData.stream;
 
   BehaviorSubject<int> _searchStatus = BehaviorSubject<int>();
   Sink<int> get _searchStatusSink => _searchStatus.sink;
@@ -49,6 +46,7 @@ class SearchBloc implements BlocBase {
   }
 
   Future getSearchResult(String searchString) async {
+    _searchStatusSink.add(SearchStatus.SEARCHING);
     if(searchString != _searchStr){
       if (resultList == null) resultList = new List();
       else resultList.clear();
@@ -69,10 +67,15 @@ class SearchBloc implements BlocBase {
         _searchStatusSink.add(SearchStatus.AFTERSEARCHWITHRESULT);
       else
         _searchStatusSink.add(SearchStatus.AFTERSEARCHNORESULT);
-      _searchDataSink.add(response);
     }).catchError((error) {
       LogUtil.e("error?? $error", tag: TAG);
-      _searchStatusSink.add(SearchStatus.AFTERSEARCHNORESULT);
+
+      if (resultList == null) resultList = new List();
+      if (resultList.length > 0)
+        _searchStatusSink.add(SearchStatus.AFTERSEARCHWITHRESULT);
+      else
+        _searchStatusSink.add(SearchStatus.AFTERSEARCHNORESULT);
+
     });
   }
 
@@ -120,7 +123,6 @@ class SearchBloc implements BlocBase {
 
   @override
   void dispose() {
-    _searchData.close();
     _searchStatusSink.close();
   }
 }
